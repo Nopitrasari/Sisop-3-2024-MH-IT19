@@ -805,9 +805,23 @@ berikut adalah output untuk membaca isi file :
 ![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151106171/f4a4770b-3507-4888-bcb6-283398049408)
 ![Screenshot from 2024-05-11 20-36-07](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151106171/6af21607-684f-42a1-b04f-cc7df4ed6ba8)
 berikut output untuk menambahkan Kanokari :
-![image](https://github.com/N![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151106171/e8f17765-7601-46d1-9736-4ca6c37ccee7)
-opitrasari/Sisop-3-2024-MH-IT19/assets/151106171/12d6e72c-f7a1-4131-86ee-31c55617bfa8)
-![Uploading image.png…]()
+![Screenshot from 2024-05-11 21-24-39](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151106171/d673ecfb-8870-463a-a90a-973914a026ba)
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151106171/81a020e9-5d3a-412e-ac23-77a740fe6169)
+berikut output untuk Add :
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151106171/79e258d6-3aba-46a9-b7bb-a6f00f638f02)
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151106171/1a4814e6-526d-4e06-9fd0-b41226e71078)
+berikut output untuk edit :
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151106171/5a7af341-0241-4cde-a02c-965fdccb63bd)
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151106171/4c7eeb72-e778-439a-af53-7be9d8915a0b)
+berikut output untuk delete :
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151106171/371f0ad0-1b34-4b20-8871-58af494dc74c)
+
+isi change.log :
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151106171/67bd123d-0fbf-4fcf-8be1-ab0b6d51bdfe)
+
+
+
+
 
 
 
