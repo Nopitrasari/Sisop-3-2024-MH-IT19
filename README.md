@@ -155,7 +155,32 @@ int pipe_parent_to_child[2];
 kode diatas untuk proses parents
 
 ```
+close(pipe_parent_to_child[1]);
+        close(pipe_child_to_parent[0]);
 
+        int result;
+        read(pipe_parent_to_child[0], &result, sizeof(result));
+
+        char kata[100];
+        ubahkata(result, kata);
+
+        char message[150];
+        if (strcmp(argv[1], "-kali") == 0) {
+            sprintf(message, "hasil perkalian %d dan %d adalah %s.", num1, num2, kata);
+        } else if (strcmp(argv[1], "-tambah") == 0) {
+            sprintf(message, "hasil penjumlahan %d dan %d adalah %s.", num1, num2, kata);
+        } else if (strcmp(argv[1], "-kurang") == 0) {
+            sprintf(message, "hasil pengurangan %d dan %d adalah %s.", num1, num2, kata);
+        } else {
+            sprintf(message, "hasil pembagian %d dan %d adalah %s.", num1, num2, kata);
+        }
+
+        write(pipe_child_to_parent[1], message, sizeof(message));
+        close(pipe_parent_to_child[0]);
+        close(pipe_child_to_parent[1]);
+
+        exit(EXIT_SUCCESS);
+    }
 ```
 kode diatas untuk proses child
 
@@ -211,6 +236,18 @@ untuk hasil bagi jika angka pertama yang dimasukin lebih kecil
 berikut kode untuk membuat histori log
 
 ```
+// Log the result
+        FILE *filelog = fopen("histori.log", "a");
+        if (filelog != NULL) {
+            char pesanlog[100];
+            time_t now = time(NULL);
+            struct tm *tm_info = localtime(&now);
+            strftime(pesanlog, sizeof(pesanlog), "[%d/%m/%y %H:%M:%S]", tm_info);
+            fprintf(filelog, "%s [%s] %s\n", pesanlog, argv[1] + 1, message);
+            fclose(filelog);
+        } else {
+            perror("fopen");
+        }
 ```
 berikut adalah isi dari histori log
 
