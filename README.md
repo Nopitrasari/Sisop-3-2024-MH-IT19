@@ -257,6 +257,34 @@ dibawah ini adalah hasil jika tidak ditambah kali kurang bagi atau tambah
 
 ![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151911480/a2b8ab07-c390-4150-9391-2172c155b1bb)
 
+#SOAL 3
+#SOAL 4
+Lewis Hamilton 🏎 seorang wibu akut dan sering melewatkan beberapa episode yang karena sibuk menjadi asisten. Maka dari itu dia membuat list anime yang sedang ongoing (biar tidak lupa) dan yang completed (anime lama tapi pengen ditonton aja). Tapi setelah Lewis pikir-pikir malah kepikiran untuk membuat list anime. Jadi dia membuat file (harap diunduh) dan ingin menggunakan socket yang baru saja dipelajarinya untuk melakukan CRUD pada list animenya. 
+Client dan server terhubung melalui socket. 
+client.c di dalam folder client dan server.c di dalam folder server
+Client berfungsi sebagai pengirim pesan dan dapat menerima pesan dari server.
+Server berfungsi sebagai penerima pesan dari client dan hanya menampilkan pesan perintah client saja.  
+Server digunakan untuk membaca myanimelist.csv. Dimana terjadi pengiriman data antara client ke server dan server ke client.
+Menampilkan seluruh judul
+Menampilkan judul berdasarkan genre
+Menampilkan judul berdasarkan hari
+Menampilkan status berdasarkan berdasarkan judul
+Menambahkan anime ke dalam file myanimelist.csv
+Melakukan edit anime berdasarkan judul
+Melakukan delete berdasarkan judul
+Selain command yang diberikan akan menampilkan tulisan “Invalid Command”
+Karena Lewis juga ingin track anime yang ditambah, diubah, dan dihapus. Maka dia membuat server dapat mencatat anime yang dihapus dalam sebuah log yang diberi nama change.log.
+Format: [date] [type] [massage]
+Type: ADD, EDIT, DEL
+Ex:
+[29/03/24] [ADD] Kanokari ditambahkan.
+[29/03/24] [EDIT] Kamis,Comedy,Kanokari,completed diubah menjadi Jumat,Action,Naruto,completed.
+[29/03/24] [DEL] Naruto berhasil dihapus.
+
+Koneksi antara client dan server tidak akan terputus jika ada kesalahan input dari client, cuma terputus jika user mengirim pesan “exit”. Program exit dilakukan pada sisi client
+
+#PENYELESAIAN
+
 
 
 
