@@ -482,6 +482,336 @@ int main() {
 }
 ```
 # REVISI 
+code client.c revisi 
+```
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <string.h>
+#include <unistd.h> // Fungsi untuk sistem POSIX (seperti close)
+#include <arpa/inet.h> // Fungsi untuk manipulasi alamat internet
+#include <sys/socket.h> // Fungsi untuk manipulasi soket
+
+#define SERVER_PORT 50535 // Port server yang akan dihubungi oleh klien
+#define BUFFER_SIZE 1024 // Ukuran buffer untuk pesan
+
+int main() {
+    int client_socket; // Variabel untuk menyimpan file descriptor dari soket klien
+    struct sockaddr_in server_address; // Struktur untuk menyimpan informasi alamat server
+    char message_buffer[BUFFER_SIZE] = {0}; // Buffer untuk menyimpan pesan yang dikirimkan oleh pengguna atau diterima dari server
+
+    // Create socket
+    if ((client_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        perror("Socket creation failed"); // Cetak pesan kesalahan jika gagal membuat soket
+        exit(EXIT_FAILURE);
+    }
+
+    // Initialize server address structure
+    server_address.sin_family = AF_INET;
+    server_address.sin_port = htons(SERVER_PORT);
+
+    // Convert IP address from text to binary form
+    if (inet_pton(AF_INET, "127.0.0.1", &server_address.sin_addr) <= 0) {
+        perror("Invalid address/ Address not supported"); // Cetak pesan kesalahan jika gagal mengonversi alamat IP
+        exit(EXIT_FAILURE);
+    }
+
+    // Connect to server
+    if (connect(client_socket, (struct sockaddr *)&server_address, sizeof(server_address)) < 0) {
+        perror("Connection failed"); // Cetak pesan kesalahan jika gagal terhubung ke server
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Connected to server\n");
+
+    // Main loop to continuously send and receive messages until "exit" command
+    while (1) {
+        printf("Enter message: ");
+        fgets(message_buffer, BUFFER_SIZE, stdin); // Baca pesan dari pengguna
+
+        // Send message to server
+        send(client_socket, message_buffer, strlen(message_buffer), 0);
+
+        // Exit if message is "exit"
+        if (strcmp(message_buffer, "exit\n") == 0) {
+            printf("Exiting...\n");
+            break;
+        }
+
+        // Receive response from server
+        memset(message_buffer, 0, sizeof(message_buffer)); // Bersihkan buffer sebelum menerima respons
+        read(client_socket, message_buffer, BUFFER_SIZE); // Terima respons dari server
+        printf("Server response: %s\n", message_buffer); // Cetak respons dari server
+    }
+
+    // Close client socket
+    close(client_socket);
+    return 0;
+}
+```
+Code server.c revisi 
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <time.h>
+#include <curl/curl.h>
+
+#define PORT 50535
+#define BUFFER_SIZE 1024
+#define LOG_FILE "change.log"
+#define FILENAME "myanimelist.csv"
+#define DOWNLOAD_URL "https://drive.google.com/uc?export=download&id=10p_kzuOgaFY3WT6FVPJIXFbkej2s9f50"
+
+// Function to download file using wget
+int download_file(const char *url, const char *filename) {
+    char command[256];
+    sprintf(command, "wget -O %s \"%s\"", filename, url);
+    int result = system(command);
+    return result == 0 ? 1 : 0;
+}
+
+// Function to read the content of a file
+void read_file_content(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file) {
+        char buffer[BUFFER_SIZE];
+        while (fgets(buffer, BUFFER_SIZE, file)) {
+            printf("%s", buffer);
+        }
+        fclose(file);
+    } else {
+        printf("Failed to open file for reading\n");
+    }
+}
+
+// Function to log changes
+void log_change(const char *type, const char *message) {
+    FILE *log_file = fopen(LOG_FILE, "a");
+    if (log_file != NULL) {
+        time_t current_time;
+        time(&current_time);
+        struct tm *local_time = localtime(&current_time);
+        fprintf(log_file, "[%02d/%02d/%02d] [%s] %s\n", local_time->tm_mday, local_time->tm_mon + 1, local_time->tm_year % 100, type, message);
+        fclose(log_file);
+    } else {
+        printf("Failed to open log file\n");
+        fflush(stdout); // Force writing output to terminal
+    }
+}
+
+// Function to add new anime entry
+void add_anime_entry(const char *entry) {
+    FILE *file = fopen(FILENAME, "a");
+    if (file) {
+        fprintf(file, "%s\n", entry);
+        fclose(file);
+        // Log addition
+        log_change("ADD", entry);
+    } else {
+        printf("Failed to open file for adding entry\n");
+    }
+}
+
+// Function to edit anime entry
+void edit_anime_entry(const char *old_entry, const char *new_entry) {
+    FILE *file = fopen(FILENAME, "r+");
+    if (file) {
+        char line[BUFFER_SIZE];
+        long int pos;
+        while (fgets(line, BUFFER_SIZE, file)) {
+            if (strstr(line, old_entry) == line) {
+                pos = ftell(file) - strlen(line);
+                fseek(file, pos, SEEK_SET);
+                fprintf(file, "%s\n", new_entry);
+                fclose(file);
+                // Log edit
+                log_change("EDIT", new_entry);
+                return;
+            }
+        }
+        printf("Anime entry not found for editing\n");
+        fclose(file);
+    } else {
+        printf("Failed to open file for editing entry\n");
+    }
+}
+
+// Function to delete anime entry
+void delete_anime_entry(const char *title) {
+    FILE *file = fopen(FILENAME, "r+");
+    if (file) {
+        FILE *temp_file = fopen("temp.csv", "w");
+        char line[BUFFER_SIZE];
+        int found = 0;
+        while (fgets(line, BUFFER_SIZE, file)) {
+            if (strstr(line, title) != line) {
+                fprintf(temp_file, "%s", line);
+            } else {
+                found = 1;
+            }
+        }
+        fclose(file);
+        fclose(temp_file);
+        remove(FILENAME);
+        rename("temp.csv", FILENAME);
+        // Log deletion
+        if (found) {
+            log_change("DEL", title);
+        } else {
+            printf("Anime entry not found for deletion\n");
+        }
+    } else {
+        printf("Failed to open file for deleting entry\n");
+    }
+}
+
+void handle_client(int client_socket) {
+    char buffer[BUFFER_SIZE] = {0};
+    int valread;
+
+    // Read client message
+    valread = read(client_socket, buffer, BUFFER_SIZE);
+    printf("Client message: %s\n", buffer);
+    fflush(stdout); // Force writing output to terminal
+
+    // Process client message
+    if (strcmp(buffer, "exit\n") == 0) {
+        printf("Closing connection with client\n");
+        close(client_socket);
+        return;
+    } else if (strcmp(buffer, "download\n") == 0) {
+        // Download file using wget
+        int success = download_file(DOWNLOAD_URL, FILENAME);
+        if (success) {
+            printf("File downloaded successfully\n");
+            // Respond to client
+            char *response = "File downloaded successfully";
+            send(client_socket, response, strlen(response), 0);
+        } else {
+            fprintf(stderr, "Failed to download file\n");
+            // Respond to client
+            char *response = "Failed to download file";
+            send(client_socket, response, strlen(response), 0);
+        }
+    } else if (strcmp(buffer, "read\n") == 0) {
+        // Read the content of the downloaded file
+        printf("File content:\n");
+        read_file_content(FILENAME);
+        // Respond to client
+        char *response = "File content displayed on server terminal";
+        send(client_socket, response, strlen(response), 0);
+    } else if (strcmp(buffer, "add\n") == 0) {
+        // Respond to client
+        char *response = "Enter anime details in the format: title,genre,producer,status";
+        send(client_socket, response, strlen(response), 0);
+    } else if (strncmp(buffer, "add ", 4) == 0) {
+        // Add anime entry
+        add_anime_entry(buffer + 4); // Skip "add " part
+        // Respond to client
+        char *response = "Anime entry added successfully";
+        send(client_socket, response, strlen(response), 0);
+    } else if (strcmp(buffer, "edit\n") == 0) {
+        // Respond to client
+        char *response = "Enter old and new anime details in the format: old_title,old_genre,old_producer,old_status,new_title,new_genre,new_producer,new_status";
+        send(client_socket, response, strlen(response), 0);
+    } else if (strncmp(buffer, "edit ", 5) == 0) {
+        // Parse old and new anime entries
+        char *token = strtok(buffer + 5, ",");
+        char old_entry[BUFFER_SIZE];
+        strcpy(old_entry, token);
+        char new_entry[BUFFER_SIZE];
+        for (int i = 0; i < 3; i++) {
+            token = strtok(NULL, ",");
+            if (token == NULL) {
+                printf("Invalid format for edit message\n");
+                fflush(stdout); // Force writing output to terminal
+                return;
+            }
+            strcat(new_entry, token);
+            strcat(new_entry, ",");
+        }
+        token = strtok(NULL, ",");
+        if (token == NULL) {
+            printf("Invalid format for edit message\n");
+            fflush(stdout); // Force writing output to terminal
+            return;
+        }
+        strcat(new_entry, token);
+        // Edit anime entry
+        edit_anime_entry(old_entry, new_entry);
+        // Respond to client
+        char *response = "Anime entry edited successfully";
+        send(client_socket, response, strlen(response), 0);
+    } else if (strncmp(buffer, "delete ", 7) == 0) {
+        // Delete anime entry
+        delete_anime_entry(buffer + 7); // Skip "delete " part
+        // Respond to client
+        char *response = "Anime entry deleted successfully";
+        send(client_socket, response, strlen(response), 0);
+    } else {
+        // Respond to client
+        char *response = "Message received";
+        send(client_socket, response, strlen(response), 0);
+    }
+}
+
+int main() {
+    int server_fd, client_socket;
+    struct sockaddr_in address;
+    int addrlen = sizeof(address);
+
+    // Create server socket
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(PORT);
+
+    // Bind server socket
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        perror("Binding failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // Listen for incoming connections
+    if (listen(server_fd, 3) < 0) {
+        perror("Listen failed");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Server listening on port %d\n", PORT);
+    fflush(stdout); // Force writing output to terminal
+
+    // Accept client connections and handle messages
+    while (1) {
+        if ((client_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
+            perror("Accept failed");
+            exit(EXIT_FAILURE);
+        }
+
+        handle_client(client_socket);
+    }
+
+    return 0;
+}
+```
+berikut adalah output untuk membaca isi file : 
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151106171/f4a4770b-3507-4888-bcb6-283398049408)
+![Screenshot from 2024-05-11 20-36-07](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151106171/6af21607-684f-42a1-b04f-cc7df4ed6ba8)
+berikut output untuk menambahkan Kanokari :
+![image](https://github.com/N![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151106171/e8f17765-7601-46d1-9736-4ca6c37ccee7)
+opitrasari/Sisop-3-2024-MH-IT19/assets/151106171/12d6e72c-f7a1-4131-86ee-31c55617bfa8)
+![Uploading image.png…]()
+
+
+
+
 
 
 
