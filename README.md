@@ -53,3 +53,42 @@ Ex:
 
 # PENYELESAIAN
 
+```
+int stringkeint(char *str) {
+    if (strcmp(str, "satu") == 0) return 1;
+    else if (strcmp(str, "dua") == 0) return 2;
+    else if (strcmp(str, "tiga") == 0) return 3;
+    else if (strcmp(str, "empat") == 0) return 4;
+    else if (strcmp(str, "lima") == 0) return 5;
+    else if (strcmp(str, "enam") == 0) return 6;
+    else if (strcmp(str, "tujuh") == 0) return 7;
+    else if (strcmp(str, "delapan") == 0) return 8;
+    else if (strcmp(str, "sembilan") == 0) return 9;
+    else return -1;
+}
+
+
+void ubahkata(int num, char *kata) { //untuk mengubah angka menjadi huruf
+    char *ones[] = {"", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan"};
+    char *teens[] = {"sepuluh", "sebelas", "dua belas", "tiga belas", "empat belas", "lima belas", "enam belas", "tujuh belas", "delapan belas", "sembilan belas"};
+    char *tens[] = {"", "dua puluh", "tiga puluh", "empat puluh", "lima puluh", "enam puluh", "tujuh puluh", "delapan puluh", "sembilan puluh"};
+
+    if (num >= 1 && num <= 9) {
+        strcpy(kata, ones[num]);
+    } else if (num >= 10 && num <= 19) {
+	strcpy(kata, teens[num - 10]);
+    } else if (num >= 20 && num <= 99) {
+        int ten = num / 10;
+        int one = num % 10;
+        if (one == 0) {
+            strcpy(kata, tens[ten]);
+        } else {
+            sprintf(kata, "%s %s", tens[ten], ones[one]);
+        }
+    }
+}
+```
+kode diatas adalah kode untuk mengubah angka menjadi sebuah kata 
+
+```
+
