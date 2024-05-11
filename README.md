@@ -155,11 +155,25 @@ int pipe_parent_to_child[2];
 kode diatas untuk proses parents
 
 ```
+
 ```
 kode diatas untuk proses child
 
 # REVISI
+
+untuk revisi nya saya menambahkan kode berikut pada child proses
+
 ```
+char input[20];
+        printf("Masukkan dua angka (dalam kata): ");
+        fgets(input, sizeof(input), stdin);
+        strtok(input, "\n");
+
+        char *token = strtok(input, " ");
+        int num1 = stringkeint(token);
+        token = strtok(NULL, " ");
+ int num2 = stringkeint(token);
+
 ```
 
 berikut kode child yang sudah direvisi, awalnya string awal yang dimasukkan tidak berubah menjadi angka 
