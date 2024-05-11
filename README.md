@@ -6,6 +6,162 @@ Anggota Kelompok IT19 :
 2. Aswalia Novitriasari (5027231012)
 3. Benjamin Khawarizmi Habibi (5027231078)
 
+# SOAL SHIFT NOMOR 1
+Pada zaman dahulu pada galaksi yang jauh-jauh sekali, hiduplah seorang Stelle. Stelle adalah seseorang yang sangat tertarik dengan Tempat Sampah dan Parkiran Luar Angkasa. Stelle memulai untuk mencari Tempat Sampah dan Parkiran yang terbaik di angkasa. Dia memerlukan program untuk bisa secara otomatis mengetahui Tempat Sampah dan Parkiran dengan rating terbaik di angkasa. Programnya berbentuk microservice sebagai berikut:
+
+a. Dalam auth.c pastikan file yang masuk ke folder new-entry adalah file csv dan berakhiran  trashcan dan parkinglot. Jika bukan, program akan secara langsung akan delete file tersebut. 
+Contoh dari nama file yang akan diautentikasi:
+- belobog_trashcan.csv
+- osaka_parkinglot.csv
+
+b. Format data (Kolom)  yang berada dalam file csv adalah seperti berikut:
+
+<img width="411" alt="no1 1 " src="https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/149749135/f6ef6c77-2565-4857-806c-342d2988d1f3">
+
+atau
+
+<img width="422" alt="no1 2" src="https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/149749135/ee2c855e-880a-4090-99a9-5bb02aaefc8a">
+
+c. File csv yang lolos tahap autentikasi akan dikirim ke shared memory.
+
+d. Dalam rate.c, proses akan mengambil data csv dari shared memory dan akan memberikan output Tempat Sampah dan Parkiran dengan Rating Terbaik dari data tersebut.
+
+<img width="416" alt="no1 3" src="https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/149749135/71650992-b63c-46b9-b517-e9b3f6c0bb94">
+
+e. Pada db.c, proses bisa memindahkan file dari new-data ke folder microservices/database, WAJIB MENGGUNAKAN SHARED MEMORY.
+
+f. Log semua file yang masuk ke folder microservices/database ke dalam file db.log dengan contoh format sebagai berikut:
+[DD/MM/YY hh:mm:ss] [type] [filename]
+ex : `[07/04/2024 08:34:50] [Trash Can] [belobog_trashcan.csv]
+
+<img width="496" alt="no1 4" src="https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/149749135/71426a0c-9d79-4112-91ca-e85581463f65">
+
+
+# PENYELESAIAN
+
+Mebuat file c bernama auth.c with : 
+```
+touch auth.c ; nano ath.c
+```
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dirent.h>
+#include <unistd.h>
+
+
+//Oleh : Benjamin Khawarizmi Habibi
+//NRP : 5027231078
+
+#define MAX_PATH_LENGTH 256
+#define DIRECTORY_TO_PROCESS "new-entry"
+
+// Check if the file has an acceptable format
+int isValidFile(const char *name) {
+    size_t length = strlen(name);
+
+    // Early out for names too short to be valid
+    if (length < 5) {
+        return 0;
+    }
+
+    // Check file extension and required substring
+    const char *fileExt = name + length - 4;
+    int hasValidExt = (strcmp(fileExt, ".csv") == 0);
+    int hasKeyword = (strstr(name, "_trashcan") != NULL || strstr(name, "_parkinglot") != NULL);
+
+    return hasValidExt && hasKeyword;
+}
+
+// Process files within specified directory
+void processDirectory(const char *directoryName) {
+    DIR *directory = opendir(directoryName);
+    struct dirent *fileInfo;
+    char pathBuffer[MAX_PATH_LENGTH];
+
+    if (!directory) {
+        perror("Failed to open directory");
+        return;
+    }
+
+    // Read each file in the directory
+    while ((fileInfo = readdir(directory)) != NULL) {
+        if (fileInfo->d_type == DT_REG) {  // Ensure it's a regular file
+            if (isValidFile(fileInfo->d_name)) {
+                printf("Valid file: %s\n", fileInfo->d_name);
+            } else {
+                printf("Invalid file: %s\n", fileInfo->d_name);
+                snprintf(pathBuffer, sizeof(pathBuffer), "%s/%s", directoryName, fileInfo->d_name);
+                char *command[] = {"rm", pathBuffer, NULL};
+                if (execvp(command[0], command) == -1) {
+                    perror("Failed to delete file");
+                }
+            }
+        }
+    }
+
+    closedir(directory);
+}
+
+int main() {
+    processDirectory(DIRECTORY_TO_PROCESS);
+    return 0;
+}
+```
+
+terdapat kesalahan dalam melakukan compile di syntaxnya maka saya ganti syntaxnya dengan
+
+# REVISI
+```
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAX_FILE_NAME_LENGTH 256
+#define CSV_EXTENSION ".csv"
+#define TRASHCAN_SUFFIX "_trashcan"
+#define PARKINGLOT_SUFFIX "_parkinglot"
+
+void authenticate_file( char *file_name) {
+    char *token = strtok(file_name, ".");
+    char *extension = strtok(NULL, ".");
+    char *suffix = strstr(file_name, TRASHCAN_SUFFIX);
+    if (!suffix) {
+        suffix = strstr(file_name, PARKINGLOT_SUFFIX);
+    }
+
+    if (strcmp(extension, CSV_EXTENSION) != 0 || !suffix) {
+        printf("Invalid file: %s. Deleting...\n", file_name);
+        remove(file_name);
+        return;
+    }
+
+    printf("File authenticated: %s\n", file_name);
+    // Send file to shared memory
+    // ...
+}
+
+int main() {
+    char file_name[MAX_FILE_NAME_LENGTH];
+    printf("Enter file name: ");
+    fgets(file_name, MAX_FILE_NAME_LENGTH, stdin);
+    file_name[strcspn(file_name, "\n")] = 0; // Remove newline character
+
+    authenticate_file(file_name);
+
+    return 0;
+}
+````
+
+Outputnya 
+
+<img width="640" alt="Dokumentasi 1" src="https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/149749135/ac9d662b-a843-4e4a-8014-718eacc93643">
+
+Karena file csv di punya saya belum bisa dibuat jadi saya hanya bisa sampai sini saja
+
+
 # SOAL SHIFT NOMOR 2
 Max Verstappen 🏎️ seorang pembalap F1 dan programer memiliki seorang adik bernama Min Verstappen (masih SD) sedang menghadapi tahap paling kelam dalam kehidupan yaitu perkalian matematika, Min meminta bantuan Max untuk membuat kalkulator perkalian sederhana (satu sampai sembilan). Sembari Max nguli dia menyuruh Min untuk belajar perkalian dari web (referensi) agar tidak bergantung pada kalkulator.
 (Wajib menerapkan konsep pipes dan fork seperti yang dijelaskan di modul Sisop. Gunakan 2 pipes dengan diagram seperti di modul 3).
