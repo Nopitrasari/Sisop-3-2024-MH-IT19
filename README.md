@@ -447,6 +447,111 @@ in-program CLI:
 Command: Fuel
 Info: 55%
 
+# REVISI 
+
+```
+// actions.c
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Function to handle Gap instruction
+char* handleGap(float distance) {
+    if (distance < 3.5) {
+        return "Gogogo";
+    } else if (distance > 3.5 && distance <= 10) {
+        return "Push";
+    } else {
+        return "Stay out of trouble";
+    }
+}
+
+// Function to handle Fuel instruction
+char* handleFuel(int fuelPercentage) {
+    if (fuelPercentage > 80) {
+        return "Push Push Push";
+    } else if (fuelPercentage >= 50 && fuelPercentage <= 80) {
+        return "You can go";
+    } else {
+        return "Conserve Fuel";
+    }
+}
+
+// Function to handle Tire instruction
+char* handleTire(int tireUsage) {
+    if (tireUsage > 80) {
+        return "Go Push Go Push";
+    } else if (tireUsage >= 50 && tireUsage <= 80) {
+        return "Good Tire Wear";
+    } else if (tireUsage >= 30 && tireUsage < 50) {
+        return "Conserve Your Tire";
+    } else {
+        return "Box Box Box";
+    }
+}
+
+// Function to handle Tire Change instruction
+char* handleTireChange(char* currentTire) {
+    if (strcmp(currentTire, "Soft") == 0) {
+        return "Mediums Ready";
+    } else if (strcmp(currentTire, "Medium") == 0) {
+        return "Box for Softs";
+    } else {
+        return "Invalid tire type";
+    }
+}
+```
+
+# Kendala
+ 
+<img width="605" alt="Screenshot 2024-05-11 234542" src="https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/149749135/24cded6b-8147-45f8-8f47-ea19d070a583">
+
+Untuk File paddock.c 
+```
+// paddock.c
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "actions.c" // Include actions.c to use its functions
+
+int main() {
+    // Dummy variables for testing
+    float gap = 5.2;
+    int fuel = 60;
+    int tire = 75;
+    char* tireType = "Soft";
+    
+    // Example function calls
+    printf("[Paddock] [07/04/2024 08:34:51]: [Gap] [%s]\n", handleGap(gap));
+    printf("[Paddock] [07/04/2024 08:34:51]: [Fuel] [%s]\n", handleFuel(fuel));
+    printf("[Paddock] [07/04/2024 08:34:51]: [Tire] [%s]\n", handleTire(tire));
+    printf("[Paddock] [07/04/2024 08:34:51]: [Tire Change] [%s]\n", handleTireChange(tireType));
+    
+    // Logging to race.log
+    FILE *fptr;
+    fptr = fopen("race.log", "a");
+    if (fptr == NULL) {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+    fprintf(fptr, "[Paddock] [07/04/2024 08:34:51]: [Gap] [%s]\n", handleGap(gap));
+    fprintf(fptr, "[Paddock] [07/04/2024 08:34:51]: [Fuel] [%s]\n", handleFuel(fuel));
+    fprintf(fptr, "[Paddock] [07/04/2024 08:34:51]: [Tire] [%s]\n", handleTire(tire));
+    fprintf(fptr, "[Paddock] [07/04/2024 08:34:51]: [Tire Change] [%s]\n", handleTireChange(tireType));
+    fclose(fptr);
+
+    return 0;
+}
+```
+
+# Kendalanya 
+
+<img width="632" alt="Screenshot 2024-05-11 234826" src="https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/149749135/518680ab-daf2-4cd2-bd32-fa48bf9b73b8">
+
+Dikarenakan dari kemi kurang bisa dalam menyelesaikan soal nomor 3 ini, maka kami hanya bisa sampai kesini saja
+
 # SOAL 4
 Lewis Hamilton 🏎 seorang wibu akut dan sering melewatkan beberapa episode yang karena sibuk menjadi asisten. Maka dari itu dia membuat list anime yang sedang ongoing (biar tidak lupa) dan yang completed (anime lama tapi pengen ditonton aja). Tapi setelah Lewis pikir-pikir malah kepikiran untuk membuat list anime. Jadi dia membuat file (harap diunduh) dan ingin menggunakan socket yang baru saja dipelajarinya untuk melakukan CRUD pada list animenya. 
 Client dan server terhubung melalui socket. 
