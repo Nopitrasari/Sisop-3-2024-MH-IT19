@@ -91,4 +91,126 @@ void ubahkata(int num, char *kata) { //untuk mengubah angka menjadi huruf
 kode diatas adalah kode untuk mengubah angka menjadi sebuah kata 
 
 ```
+int pipe_parent_to_child[2];
+    int pipe_child_to_parent[2];
+
+    if (pipe(pipe_parent_to_child) == -1 || pipe(pipe_child_to_parent) == -1) {
+        perror("pipe");
+        exit(EXIT_FAILURE);
+    }
+
+    pid_t pid = fork();
+
+    if (pid == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    }
+
+    if (pid > 0) {
+        close(pipe_parent_to_child[0]);
+        close(pipe_child_to_parent[1]);
+
+        char input[20];
+        printf("Masukkan dua angka (dalam kata): ");
+        fgets(input, sizeof(input), stdin);
+        strtok(input, "\n");
+
+        char *token = strtok(input, " ");
+        int num1 = stringkeint(token);
+	token = strtok(NULL, " ");
+        int num2 = stringkeint(token);
+
+        int result;
+        if (strcmp(argv[1], "-kali") == 0) {
+            result = num1 * num2;
+        } else if (strcmp(argv[1], "-tambah") == 0) {
+            result = num1 + num2;
+        } else if (strcmp(argv[1], "-kurang") == 0) {
+            result = num1 - num2;
+            if (result < 0) {
+                printf("ERROR pada pengurangan.\n");
+                exit(EXIT_FAILURE);
+            }
+        } else {
+            if (num2 == 0) {
+                printf("ERROR: Pembagian dengan nol\n");
+                exit(EXIT_FAILURE);
+            }
+            result = num1 / num2;
+            if (result < 0) {
+                printf("ERROR pada pembagian.\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        write(pipe_parent_to_child[1], &result, sizeof(result));
+
+        char message[200];
+        read(pipe_child_to_parent[0], message, sizeof(message));
+        printf("%s\n", message);
+
+        close(pipe_parent_to_child[1]);
+        close(pipe_child_to_parent[0]);
+```
+kode diatas untuk proses parents
+
+```
+```
+kode diatas untuk proses child
+
+# REVISI
+```
+```
+
+berikut kode child yang sudah direvisi, awalnya string awal yang dimasukkan tidak berubah menjadi angka 
+
+# Dokumentasi
+
+untuk hasil tambah
+
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151911480/7bbc55e3-ea39-434b-a52d-c0324bc97215)
+
+untuk hasil kali
+
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151911480/9a036fbd-9501-41a6-aac5-331869e99da6)
+
+untuk hasil kurang
+
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151911480/13723bde-204c-4900-bf52-ea4759476f3a)
+
+untuk hasil kurang jika angka pertama yang dimasukin lebih kecil
+
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151911480/bb9db322-517d-46d0-ae3d-99c93b9a5fa0)
+
+untuk hasil bagi
+
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151911480/7d1e093f-befe-4bb8-b9c5-9a8c99bb37fb)
+
+untuk hasil bagi jika hasil tidak pas maka akan dibulatkan ke angka didepannya
+
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151911480/0fb0b6b8-46f3-4249-bb3e-3edce43bf19a)
+
+untuk hasil bagi jika angka pertama yang dimasukin lebih kecil
+
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151911480/173e85f1-15ab-42c6-8d06-a7fb48d892bb)
+
+berikut kode untuk membuat histori log
+
+```
+```
+berikut adalah isi dari histori log
+
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151911480/e147c7cb-0aaf-4bfb-a1a3-c681b6a4f4b0)
+
+dibawah ini adalah hasil jika tidak ditambah kali kurang bagi atau tambah
+
+![image](https://github.com/Nopitrasari/Sisop-3-2024-MH-IT19/assets/151911480/a2b8ab07-c390-4150-9391-2172c155b1bb)
+
+
+
+
+
+
+
+
 
